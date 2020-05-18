@@ -7,8 +7,6 @@ from Foundation import *
 import json
 from datetime import date,datetime 
 import os
-#https://www.haskell.org/arrows/syntax.html
-
 #FUNCTIONS
 def run_this_scpt(scpt, args=[]):
     p = Popen(['osascript', '-'] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -49,7 +47,7 @@ def handle_data_file(today):
             return {}
 
 
-def dump_into_file(today,datas):
+def dump_into_file(today,datas, appz, linkzs):
     """
     str --> Dumps into file --> dictionary \n
     This function writes to a file \n
@@ -58,9 +56,9 @@ def dump_into_file(today,datas):
     filenames = str(today) + ".json"
     with open(filenames, 'a') as f:
         json.dump(datas, f, indent=4)
-    time.sleep(10)
-    main()
-def throw_in_json(app, link, time_stamps, productive):
+    time.sleep(5)
+    main(appz, linkzs)
+def throw_in_json(app, link, productive):
     now = datetime.now()
     today = now.strftime("%H:%M")
     todays = date.today()
@@ -80,7 +78,7 @@ def throw_in_json(app, link, time_stamps, productive):
         }
 
 
-    dump_into_file(todays, datas)
+    dump_into_file(todays, datas, app, link)
 
 #testing testing testing     
 def find_application_name():
@@ -88,29 +86,51 @@ def find_application_name():
     Returns active app_name
     """
     return NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationName']
-def main():
-    activeAppName = find_application_name()
-    time_stamp = datetime.now()
-    print(activeAppName)
-    browsers = ["Google Chrome","Safari","Firefox","Edge"]
-    productive = ["Code", "Google Chrome", "henrico.schoology.com"]
-    not_productive = ["youtube.com"]
-    new_url = ""
-    if activeAppName in browsers:
-        
-        unnew_url = google_url(activeAppName)
-        new_url = str(unnew_url).split("/")[2]
-        print(new_url)
-    is_productive = ""
-    if activeAppName in productive:
-        is_productive = "Yes"
-    elif activeAppName in not_productive:
-        is_productive = "No"
+
+def productive(activeAppNames, linkz):
+    productive = ["Code", "henrico.schoology.com", "stackoverflow.com", "mail.google.com"]
+    not_productive = ["youtube.com", "reddit.com", "netflix.com"]
+    is_productive = False
+    if activeAppNames != "Google Chrome":
+        if activeAppNames in productive:
+            is_productive = True 
+        elif activeAppNames in not_productive:
+            is_productive = False
+        else:
+            is_productive = False
     else:
-        is_productive = "No"
-    throw_in_json(activeAppName, new_url, time_stamp, is_productive)
+        if linkz in productive:
+            is_productive = True 
+        elif linkz in not_productive:
+            is_productive = False
+        else:
+            is_productive = False
+    return is_productive
+        
+
+
+def main(currentAppName, currentURL):
+    browsers = ["Google Chrome","Safari","Firefox","Edge"]
+
+    activeAppName = find_application_name()
+    if activeAppName != currentAppName or activeAppName == "Google Chrome": 
+        if activeAppName in browsers:
+            unnew_url = google_url(activeAppName)
+            new_url = str(unnew_url).split("/")[2]
+            if new_url != currentURL:
+                currentURL = new_url
+                print(new_url)
+                is_productives = productive(currentAppName, currentURL)
+                throw_in_json(currentAppName, currentURL, is_productives)
+        else:
+            currentAppName = activeAppName
+            print(activeAppName)
+            is_productives = productive(currentAppName, "")
+            throw_in_json(currentAppName, "", is_productives)
+    
+
 
 #RUNNER
 if __name__ == "__main__":
-    main()
+    main("", "")
  
