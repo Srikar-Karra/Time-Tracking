@@ -5,7 +5,7 @@ import time
 from activity import *
 from Foundation import *
 import json
-from datetime import date,datetime
+from datetime import date,datetime 
 import os
 #https://www.haskell.org/arrows/syntax.html
 
@@ -38,8 +38,12 @@ def handle_data_file(today):
     files_in_data = os.listdir()
     filenames = str(today) + ".json"
     if filenames in files_in_data:
-        with open(filenames,"r") as f:
-            return json.load(f)
+        pass 
+        # if os.stat(filenames).st_size == 0:
+        #     return {}
+        # else:
+        #     with open(filenames,"r") as f:
+        #         return json.load(f)
     else:
         with open(filenames, 'w+') as f:
             return {}
@@ -53,23 +57,30 @@ def dump_into_file(today,datas):
     """
     filenames = str(today) + ".json"
     with open(filenames, 'a') as f:
-        f.dump(datas, f, indent=4)
+        json.dump(datas, f, indent=4)
+    time.sleep(10)
+    main()
 def throw_in_json(app, link, time_stamps, productive):
-    today = date.today()
-    data = handle_data_file(today)
+    now = datetime.now()
+    today = now.strftime("%H:%M")
+    todays = date.today()
+    data = handle_data_file(todays)
+    datas = {}
     if app != "Google Chrome":
-        data[today] = {
+        datas[str(today)] = {
             "Appilication":app,
             "Productive":productive
         }
+    
+
     else:
-        data[today] = {
+        datas[str(today)] = {
             "Appilication":link,
             "Productive":productive
         }
 
 
-    dump_into_file(today, data)
+    dump_into_file(todays, datas)
 
 #testing testing testing     
 def find_application_name():
@@ -88,7 +99,7 @@ def main():
     if activeAppName in browsers:
         
         unnew_url = google_url(activeAppName)
-        new_url = unnew_url.split("/")[2]
+        new_url = str(unnew_url).split("/")[2]
         print(new_url)
     is_productive = ""
     if activeAppName in productive:
