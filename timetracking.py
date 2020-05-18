@@ -71,7 +71,7 @@ def throw_in_json(app, link, time_stamps, productive):
 
     dump_into_file(today, data)
 
-    
+#testing testing testing     
 def find_application_name():
     """
     Returns active app_name
